@@ -6,7 +6,6 @@ void ofApp::setup(){
 
 	// we add this listener before setting up so the initial circle resolution is correct
 	circleResolution.addListener(this, &ofApp::circleResolutionChanged);
-	ringButton.addListener(this, &ofApp::ringButtonPressed);
 
 	gui.setup(); // most of the time you don't need a name
 	gui.add(filled.setup("fill", true));
@@ -15,17 +14,13 @@ void ofApp::setup(){
 	gui.add(color.setup("color", ofColor(100, 100, 140), ofColor(0, 0), ofColor(255, 255)));
 	gui.add(circleResolution.setup("circle res", 5, 3, 90));
 	gui.add(twoCircles.setup("two circles"));
-	gui.add(ringButton.setup("ring"));
 	gui.add(screenSize.setup("screen size", ofToString(ofGetWidth())+"x"+ofToString(ofGetHeight())));
 
 	bHide = false;
-
-	ring.load("ring.wav");
 }
 
 //--------------------------------------------------------------
 void ofApp::exit(){
-	ringButton.removeListener(this, &ofApp::ringButtonPressed);
 }
 
 //--------------------------------------------------------------
@@ -33,10 +28,6 @@ void ofApp::circleResolutionChanged(int &circleResolution){
 	ofSetCircleResolution(circleResolution);
 }
 
-//--------------------------------------------------------------
-void ofApp::ringButtonPressed(){
-	ring.play();
-}
 
 //--------------------------------------------------------------
 void ofApp::update(){

@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxGui.h"
+#include "ofxNumEdit.h"
 
 class ofApp : public ofBaseApp{
 	
@@ -25,21 +26,17 @@ public:
 	void gotMessage(ofMessage msg);		
 
 	void circleResolutionChanged(int & circleResolution);
-	void ringButtonPressed();
 
 	bool bHide;
 
-	ofxFloatSlider radius;
+	ofxFloatNumEdit radius;
 	ofxColorSlider color;
 	ofxVec2Slider center;
-	ofxIntSlider circleResolution;
+	ofxIntNumEdit circleResolution;
 	ofxToggle filled;
 	ofxButton twoCircles;
-	ofxButton ringButton;
 	ofxLabel screenSize;
 
 	ofxPanel gui;
-
-	ofSoundPlayer ring;
 };
 
