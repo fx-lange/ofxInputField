@@ -72,6 +72,18 @@ bool ofxNumEdit<Type>::mousePressed(ofMouseEventArgs & args){
 //	if(bUpdateOnEnterOnly){
 //		value.disableEvents();
 //	}
+	if(b.inside(args.x,args.y)){
+		if(!bGuiActive){
+			bGuiActive = true;
+			setNeedsRedraw();
+		}
+	}else{
+		if(bGuiActive){
+			bGuiActive = false;
+			setNeedsRedraw();
+			//TODO confirm/abort?
+		}
+	}
 	return false;
 }
 
@@ -134,7 +146,11 @@ template<typename Type>
 void ofxNumEdit<Type>::generateDraw(){
 	bg.clear();
 
-	bg.setFillColor(thisBackgroundColor);
+	if(bGuiActive){
+		bg.setFillColor(ofColor::white - thisBackgroundColor);
+	}else{
+		bg.setFillColor(thisBackgroundColor);
+	}
 	bg.setFilled(true);
 	bg.rectangle(b);
 
