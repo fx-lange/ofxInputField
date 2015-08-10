@@ -76,12 +76,10 @@ bool ofxNumEdit<Type>::mousePressed(ofMouseEventArgs & args){
 	if(b.inside(args.x,args.y)){
 		if(!bGuiActive){
 			bGuiActive = true;
-			setNeedsRedraw();
 		}
 	}else{
 		if(bGuiActive){
 			bGuiActive = false;
-			setNeedsRedraw();
 			//TODO confirm/abort?
 		}
 	}
@@ -121,12 +119,16 @@ void ofxNumEdit<Type>::unregisterKeyEvents(){
 
 template<typename Type>
 void ofxNumEdit<Type>::keyPressed(ofKeyEventArgs & args){
-
+	if(bGuiActive){
+		ofLogNotice("keyPressed") << args.key;
+	}
 }
 
 template<typename Type>
 void ofxNumEdit<Type>::keyReleased(ofKeyEventArgs & args){
-
+	if(bGuiActive){
+		ofLogNotice("keyReleased") << args.key;
+	}
 }
 
 template<typename Type>
@@ -206,6 +208,13 @@ void ofxNumEdit<Type>::render(){
 	ofColor c = ofGetStyle().color;
 
 	bg.draw();
+	if(bGuiActive){
+		ofPushStyle();
+		ofSetColor(255);
+		ofNoFill();
+		ofDrawRectangle(b);
+		ofPopStyle();
+	}
 
 	ofBlendMode blendMode = ofGetStyle().blendingMode;
 	if(blendMode!=OF_BLENDMODE_ALPHA){

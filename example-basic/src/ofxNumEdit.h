@@ -33,7 +33,6 @@ public:
 
 	void setUpdateOnEnterOnly(bool bUpdateOnEnterOnly);
 
-
 	template<class ListenerClass, typename ListenerMethod>
 	void addListener(ListenerClass * listener, ListenerMethod method){
 		value.addListener(listener,method);
@@ -44,12 +43,8 @@ public:
 		value.removeListener(listener,method);
 	}
 
-
-
 	double operator=(Type v);
 	operator const Type & ();
-
-	
 
 	ofAbstractParameter & getParameter();
 
