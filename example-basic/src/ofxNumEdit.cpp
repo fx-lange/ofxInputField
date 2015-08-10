@@ -277,11 +277,11 @@ void ofxNumEdit<Type>::render(){
 		//selection
 		ofPushStyle();
 		if(selectIdx1 != selectIdx2){
-			ofSetColor(100);
+			ofSetColor(thisFillColor);
 			ofFill();
 			ofDrawRectangle(selectStartX+b.x,b.y+1,selectWidth,b.height-2);
 		}else{
-			ofSetColor(100);
+			ofSetColor(thisFillColor);
 			ofDrawLine(selectStartX+b.x,b.y+1,selectStartX+b.x,b.y+b.height-2);
 		}
 		ofPopStyle();
