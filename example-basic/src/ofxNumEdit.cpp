@@ -32,6 +32,7 @@ ofxNumEdit<Type>* ofxNumEdit<Type>::setup(ofParameter<Type> _val, float width, f
 
 	value.addListener(this,&ofxNumEdit::valueChanged);
 	registerMouseEvents();
+	registerKeyEvents();
 	return this;
 }
 
@@ -98,6 +99,34 @@ bool ofxNumEdit<Type>::mouseReleased(ofMouseEventArgs & args){
 //		value.enableEvents();
 //	}
 	return false;
+}
+
+template<typename Type>
+void ofxNumEdit<Type>::registerKeyEvents(){
+	if(bRegisteredForKeyEvents == true){
+		return; // already registered.
+	}
+	bRegisteredForKeyEvents = true;
+	ofRegisterKeyEvents(this, OF_EVENT_ORDER_BEFORE_APP);
+}
+
+template<typename Type>
+void ofxNumEdit<Type>::unregisterKeyEvents(){
+	if(bRegisteredForKeyEvents == false){
+		return; // not registered.
+	}
+	ofUnregisterKeyEvents(this, OF_EVENT_ORDER_BEFORE_APP);
+	bRegisteredForKeyEvents = false;
+}
+
+template<typename Type>
+void ofxNumEdit<Type>::keyPressed(ofKeyEventArgs & args){
+
+}
+
+template<typename Type>
+void ofxNumEdit<Type>::keyReleased(ofKeyEventArgs & args){
+
 }
 
 template<typename Type>

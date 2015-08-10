@@ -25,6 +25,12 @@ public:
 	virtual bool mouseReleased(ofMouseEventArgs & args);
     virtual bool mouseScrolled(ofMouseEventArgs & args);
 
+    void registerKeyEvents();
+    void unregisterKeyEvents();
+
+    virtual void keyPressed(ofKeyEventArgs & args);
+    virtual void keyReleased(ofKeyEventArgs & args);
+
 	void setUpdateOnEnterOnly(bool bUpdateOnEnterOnly);
 
 
@@ -59,6 +65,8 @@ protected:
 	void valueChanged(Type & value);
 	ofPath bg;
 	ofVboMesh textMesh;
+
+	bool bRegisteredForKeyEvents;
 };
 
 typedef ofxNumEdit<float> ofxFloatNumEdit;
