@@ -8,7 +8,8 @@ ofxNumEdit<Type>::ofxNumEdit(){
 	bGuiActive = false;
 	mouseInside = false;
 	bRegisteredForKeyEvents = false;
-	selectStartIdx = selectEndIdx = -1;
+	selectIdx1 = selectIdx2 = -1;
+	pressCounter = 0;
 }
 
 template<typename Type>
@@ -26,6 +27,7 @@ ofxNumEdit<Type>* ofxNumEdit<Type>::setup(ofParameter<Type> _val, float width, f
 	bUpdateOnEnterOnly = false;
 	value.makeReferenceTo(_val);
 	valueStr = ofToString(value);
+	valueStrWidth = getTextBoundingBox(valueStr,0,0).width;
 	b.x = 0;
 	b.y = 0;
 	b.width = width;
@@ -36,6 +38,7 @@ ofxNumEdit<Type>* ofxNumEdit<Type>::setup(ofParameter<Type> _val, float width, f
 	value.addListener(this,&ofxNumEdit::valueChanged);
 	registerMouseEvents();
 	registerKeyEvents();
+	pressCounter = 0;
 	return this;
 }
 
@@ -66,6 +69,32 @@ Type ofxNumEdit<Type>::getMax(){
 }
 
 template<typename Type>
+void ofxNumEdit<Type>::calculateSelectionArea(){
+	std::string preSelectStr, selectStr;
+	float preSelectWidth = 0;
+
+	int selectStartIdx, selectEndIx;
+	if(selectIdx1 <= selectIdx2){
+		selectStartIdx = selectIdx1;
+		selectEndIx = selectIdx2;
+	}else{
+		selectStartIdx = selectIdx2;
+		selectEndIx = selectIdx1;
+	}
+
+	if(selectStartIdx > 0){
+		preSelectStr.assign(valueStr,0,selectStartIdx);
+		preSelectWidth = getTextBoundingBox(preSelectStr,0,0).width;
+	}
+	selectStartX = b.width - textPadding - valueStrWidth + preSelectWidth;
+
+	if(selectIdx1 != selectIdx2){
+		selectStr.assign(valueStr,selectStartIdx,selectEndIx-selectStartIdx);
+		selectWidth = getTextBoundingBox(selectStr,0,0).width;
+	}
+}
+
+template<typename Type>
 bool ofxNumEdit<Type>::mouseMoved(ofMouseEventArgs & args){
 	mouseInside = isGuiDrawing() && b.inside(ofPoint(args.x,args.y));
 	return mouseInside;
@@ -73,37 +102,29 @@ bool ofxNumEdit<Type>::mouseMoved(ofMouseEventArgs & args){
 
 template<typename Type>
 bool ofxNumEdit<Type>::mousePressed(ofMouseEventArgs & args){
-//	if(bUpdateOnEnterOnly){
+//	if(bUpdateOnEnterOnly){ TODO for later
 //		value.disableEvents();
 //	}
 	if(b.inside(args.x,args.y)){
 		if(!bGuiActive){
-			selectStartIdx = 0;
-			selectEndIdx = valueStr.size();
+			selectIdx1 = 0;
+			selectIdx2 = valueStr.size();
 
 			bGuiActive = true;
 		}else{
-			//TODO set cursor a correct pos
-			selectStartIdx = selectEndIdx = 0;
+			float cursorX = args.x - (b.x + b.width - textPadding - valueStrWidth);
+			int cursorIdx = ofMap(cursorX,0,valueStrWidth,0,valueStr.size(),true);
+			selectIdx1 = selectIdx2 = cursorIdx;
 		}
 
-		//calculate selection in pixel
-		std::string preSelectStr, selectStr;
-		float preSelectWidth = 0;
-		if(selectStartIdx > 0){
-			preSelectStr.assign(valueStr,0,selectStartIdx);
-			preSelectWidth = getTextBoundingBox(preSelectStr,0,0).width;
-		}
-		selectStartX = b.width - textPadding - getTextBoundingBox(valueStr,0,0).width + preSelectWidth;
+		calculateSelectionArea();
 
-		if(selectStartIdx != selectEndIdx){
-			selectStr.assign(valueStr,selectStartIdx,selectEndIdx);
-			selectWidth = getTextBoundingBox(selectStr,0,0).width;
-		}
+		pressCounter++;
 
 	}else{
 		if(bGuiActive){
 			bGuiActive = false;
+			pressCounter = 0;
 			//TODO confirm/abort?
 		}
 	}
@@ -112,6 +133,13 @@ bool ofxNumEdit<Type>::mousePressed(ofMouseEventArgs & args){
 
 template<typename Type>
 bool ofxNumEdit<Type>::mouseDragged(ofMouseEventArgs & args){
+	if(pressCounter <= 1) //no select on drag while select all
+		return false;
+
+	float cursorX = args.x - (b.x + b.width - textPadding - valueStrWidth);
+	int cursorIdx = ofMap(cursorX,0,valueStrWidth,0,valueStr.size(),true);
+	selectIdx2 = cursorIdx;
+	calculateSelectionArea();
 	return false;
 }
 
@@ -248,7 +276,7 @@ void ofxNumEdit<Type>::render(){
 
 		//selection
 		ofPushStyle();
-		if(selectStartIdx != selectEndIdx){
+		if(selectIdx1 != selectIdx2){
 			ofSetColor(100);
 			ofFill();
 			ofDrawRectangle(selectStartX+b.x,b.y+1,selectWidth,b.height-2);
@@ -310,6 +338,7 @@ void ofxNumEdit<Type>::setUpdateOnEnterOnly(bool _bUpdateOnEnterOnly){
 template<typename Type>
 void ofxNumEdit<Type>::valueChanged(Type & value){
     valueStr = ofToString(value);
+    valueStrWidth = getTextBoundingBox(valueStr,0,0).width;
     setNeedsRedraw();
 }
 
