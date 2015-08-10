@@ -7,6 +7,8 @@ ofxNumEdit<Type>::ofxNumEdit(){
 	bUpdateOnEnterOnly = false;
 	bGuiActive = false;
 	mouseInside = false;
+	bRegisteredForKeyEvents = false;
+	selectStartIdx = selectEndIdx = -1;
 }
 
 template<typename Type>
@@ -23,6 +25,7 @@ template<typename Type>
 ofxNumEdit<Type>* ofxNumEdit<Type>::setup(ofParameter<Type> _val, float width, float height){
 	bUpdateOnEnterOnly = false;
 	value.makeReferenceTo(_val);
+	valueStr = ofToString(value);
 	b.x = 0;
 	b.y = 0;
 	b.width = width;
@@ -75,8 +78,29 @@ bool ofxNumEdit<Type>::mousePressed(ofMouseEventArgs & args){
 //	}
 	if(b.inside(args.x,args.y)){
 		if(!bGuiActive){
+			selectStartIdx = 0;
+			selectEndIdx = valueStr.size();
+
 			bGuiActive = true;
+		}else{
+			//TODO set cursor a correct pos
+			selectStartIdx = selectEndIdx = 0;
 		}
+
+		//calculate selection in pixel
+		std::string preSelectStr, selectStr;
+		float preSelectWidth = 0;
+		if(selectStartIdx > 0){
+			preSelectStr.assign(valueStr,0,selectStartIdx);
+			preSelectWidth = getTextBoundingBox(preSelectStr,0,0).width;
+		}
+		selectStartX = b.width - textPadding - getTextBoundingBox(valueStr,0,0).width + preSelectWidth;
+
+		if(selectStartIdx != selectEndIdx){
+			selectStr.assign(valueStr,selectStartIdx,selectEndIdx);
+			selectWidth = getTextBoundingBox(selectStr,0,0).width;
+		}
+
 	}else{
 		if(bGuiActive){
 			bGuiActive = false;
@@ -121,6 +145,16 @@ template<typename Type>
 void ofxNumEdit<Type>::keyPressed(ofKeyEventArgs & args){
 	if(bGuiActive){
 		ofLogNotice("keyPressed") << args.key;
+		if(args.key >= '0' && args.key <= '9'){
+			int digit = args.key - '0';
+			std::string valueStr = ofToString(value);
+			valueStr += ofToString(digit);
+			value = ofToFloat(valueStr);
+		}else if(args.key == OF_KEY_BACKSPACE){
+			std::string valueStr = ofToString(value);
+			valueStr.resize(valueStr.size()-1);
+			value = ofToFloat(valueStr);
+		}
 	}
 }
 
@@ -177,11 +211,7 @@ template<typename Type>
 void ofxNumEdit<Type>::generateDraw(){
 	bg.clear();
 
-	if(bGuiActive){
-		bg.setFillColor(ofColor::white - thisBackgroundColor);
-	}else{
-		bg.setFillColor(thisBackgroundColor);
-	}
+	bg.setFillColor(thisBackgroundColor);
 	bg.setFilled(true);
 	bg.rectangle(b);
 
@@ -209,10 +239,23 @@ void ofxNumEdit<Type>::render(){
 
 	bg.draw();
 	if(bGuiActive){
+		//focus highlight
 		ofPushStyle();
 		ofSetColor(255);
 		ofNoFill();
 		ofDrawRectangle(b);
+		ofPopStyle();
+
+		//selection
+		ofPushStyle();
+		if(selectStartIdx != selectEndIdx){
+			ofSetColor(100);
+			ofFill();
+			ofDrawRectangle(selectStartX+b.x,b.y+1,selectWidth,b.height-2);
+		}else{
+			ofSetColor(100);
+			ofDrawLine(selectStartX+b.x,b.y+1,selectStartX+b.x,b.y+b.height-2);
+		}
 		ofPopStyle();
 	}
 
@@ -266,6 +309,7 @@ void ofxNumEdit<Type>::setUpdateOnEnterOnly(bool _bUpdateOnEnterOnly){
 
 template<typename Type>
 void ofxNumEdit<Type>::valueChanged(Type & value){
+    valueStr = ofToString(value);
     setNeedsRedraw();
 }
 

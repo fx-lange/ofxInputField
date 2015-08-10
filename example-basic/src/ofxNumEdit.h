@@ -62,6 +62,9 @@ protected:
 	ofVboMesh textMesh;
 
 	bool bRegisteredForKeyEvents;
+	int selectStartIdx, selectEndIdx;
+	float selectStartX, selectWidth;
+	std::string valueStr;
 };
 
 typedef ofxNumEdit<float> ofxFloatNumEdit;
