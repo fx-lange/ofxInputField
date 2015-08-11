@@ -116,6 +116,7 @@ bool ofxNumEdit<Type>::mousePressed(ofMouseEventArgs & args){
 			int cursorIdx = ofMap(cursorX,0,valueStrWidth,0,valueStr.size(),true);
 			selectIdx1 = selectIdx2 = cursorIdx;
 		}
+		//TODO else double click
 
 		calculateSelectionArea();
 
@@ -171,6 +172,7 @@ void ofxNumEdit<Type>::unregisterKeyEvents(){
 
 template<typename Type>
 void ofxNumEdit<Type>::keyPressed(ofKeyEventArgs & args){
+	//TODO use selection
 	if(bGuiActive){
 		ofLogNotice("keyPressed") << args.key;
 		if(args.key >= '0' && args.key <= '9'){
@@ -306,21 +308,6 @@ void ofxNumEdit<Type>::render(){
 
 template<typename Type>
 bool ofxNumEdit<Type>::setValue(float mx, float my, bool bCheck){
-//	if( !isGuiDrawing() ){
-//		bGuiActive = false;
-//		return false;
-//	}
-//	if( bCheck ){
-//		if( b.inside(mx, my) ){
-//			bGuiActive = true;
-//		}else{
-//			bGuiActive = false;
-//		}
-//	}
-//	if( bGuiActive ){
-//		value = ofMap(mx, b.x, b.x + b.width, value.getMin(), value.getMax(), true);
-//		return true;
-//	}
 	return false;
 }
 
