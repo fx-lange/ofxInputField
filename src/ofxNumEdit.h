@@ -3,6 +3,15 @@
 #include "ofxBaseGui.h"
 #include "ofParameter.h"
 
+/*
+ * TODO
+ * crash?
+ * no key spam
+ * LEFT/RIGHT
+ * ENTER
+ * floating point
+ * */
+
 template<typename Type>
 class ofxNumEdit : public ofxBaseGui{
 	friend class ofPanel;
