@@ -52,7 +52,7 @@ protected:
 	virtual void render();
 	ofParameter<Type> value;
 	bool bUpdateOnEnterOnly;
-	bool bGuiActive;
+	bool bGuiActive, bMousePressed;
 	bool mouseInside;
 	bool setValue(float mx, float my, bool bCheck);
 	virtual void generateDraw();
@@ -62,13 +62,18 @@ protected:
 	ofVboMesh textMesh;
 
 	bool bRegisteredForKeyEvents;
+
 	std::string valueStr;
-	int selectIdx1, selectIdx2;
-	float selectStartX, selectWidth, valueStrWidth;
+	float valueStrWidth;
+
+	int selectIdx1, selectIdx2; //set by mouse interaction
+	bool hasSelectionArea(){ return selectIdx1 != selectIdx2; }
+
+	float selectStartX, selectWidth; //calculated from select indices
+	int selectStartIdx, selectEndIx;
+	void calculateSelectionArea();
 
 	int pressCounter;
-
-	void calculateSelectionArea();
 };
 
 typedef ofxNumEdit<float> ofxFloatNumEdit;

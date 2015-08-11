@@ -5,7 +5,7 @@ using namespace std;
 template<typename Type>
 ofxNumEdit<Type>::ofxNumEdit(){
 	bUpdateOnEnterOnly = false;
-	bGuiActive = false;
+	bGuiActive = bMousePressed = false;
 	mouseInside = false;
 	bRegisteredForKeyEvents = false;
 	selectIdx1 = selectIdx2 = -1;
@@ -71,9 +71,7 @@ Type ofxNumEdit<Type>::getMax(){
 template<typename Type>
 void ofxNumEdit<Type>::calculateSelectionArea(){
 	std::string preSelectStr, selectStr;
-	float preSelectWidth = 0;
 
-	int selectStartIdx, selectEndIx;
 	if(selectIdx1 <= selectIdx2){
 		selectStartIdx = selectIdx1;
 		selectEndIx = selectIdx2;
@@ -82,13 +80,14 @@ void ofxNumEdit<Type>::calculateSelectionArea(){
 		selectEndIx = selectIdx1;
 	}
 
+	float preSelectWidth = 0;
 	if(selectStartIdx > 0){
 		preSelectStr.assign(valueStr,0,selectStartIdx);
 		preSelectWidth = getTextBoundingBox(preSelectStr,0,0).width;
 	}
 	selectStartX = b.width - textPadding - valueStrWidth + preSelectWidth;
 
-	if(selectIdx1 != selectIdx2){
+	if(hasSelectionArea()){
 		selectStr.assign(valueStr,selectStartIdx,selectEndIx-selectStartIdx);
 		selectWidth = getTextBoundingBox(selectStr,0,0).width;
 	}
@@ -106,6 +105,7 @@ bool ofxNumEdit<Type>::mousePressed(ofMouseEventArgs & args){
 //		value.disableEvents();
 //	}
 	if(b.inside(args.x,args.y)){
+		bMousePressed = true;
 		if(!bGuiActive){
 			selectIdx1 = 0;
 			selectIdx2 = valueStr.size();
@@ -149,6 +149,7 @@ bool ofxNumEdit<Type>::mouseReleased(ofMouseEventArgs & args){
 //	if(bUpdateOnEnterOnly){
 //		value.enableEvents();
 //	}
+	bMousePressed = false;
 	return false;
 }
 
@@ -173,18 +174,28 @@ void ofxNumEdit<Type>::unregisterKeyEvents(){
 template<typename Type>
 void ofxNumEdit<Type>::keyPressed(ofKeyEventArgs & args){
 	//TODO use selection
-	if(bGuiActive){
+	if(bGuiActive && !bMousePressed){
 		ofLogNotice("keyPressed") << args.key;
+
 		if(args.key >= '0' && args.key <= '9'){
 			int digit = args.key - '0';
-			std::string valueStr = ofToString(value);
-			valueStr += ofToString(digit);
+			if(hasSelectionArea()){
+				valueStr.erase(selectStartIdx,selectEndIx-selectStartIdx);
+			}
+			valueStr.insert(selectStartIdx,ofToString(digit));
+			selectEndIx = selectStartIdx = selectStartIdx + 1;
 			value = ofToFloat(valueStr);
 		}else if(args.key == OF_KEY_BACKSPACE){
-			std::string valueStr = ofToString(value);
-			valueStr.resize(valueStr.size()-1);
+			if(hasSelectionArea()){
+				valueStr.erase(selectStartIdx,selectEndIx-selectStartIdx);
+				selectEndIx = selectStartIdx;
+			}else if(selectStartIdx > 0){
+				valueStr.erase(selectStartIdx-1,1);
+				selectEndIx = selectStartIdx = selectStartIdx - 1;
+			}
 			value = ofToFloat(valueStr);
 		}
+		selectWidth = 0;
 	}
 }
 
@@ -278,7 +289,7 @@ void ofxNumEdit<Type>::render(){
 
 		//selection
 		ofPushStyle();
-		if(selectIdx1 != selectIdx2){
+		if(hasSelectionArea()){
 			ofSetColor(thisFillColor);
 			ofFill();
 			ofDrawRectangle(selectStartX+b.x,b.y+1,selectWidth,b.height-2);
