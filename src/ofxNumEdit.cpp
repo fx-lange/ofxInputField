@@ -189,11 +189,12 @@ void ofxNumEdit<Type>::keyPressed(ofKeyEventArgs & args){
 			if(hasSelectionArea()){
 				valueStr.erase(selectStartIdx,selectEndIx-selectStartIdx);
 				selectEndIx = selectStartIdx;
+				value = ofToFloat(valueStr);
 			}else if(selectStartIdx > 0){
 				valueStr.erase(selectStartIdx-1,1);
 				selectEndIx = selectStartIdx = selectStartIdx - 1;
+				value = ofToFloat(valueStr);
 			}
-			value = ofToFloat(valueStr);
 		}
 		selectWidth = 0;
 	}
