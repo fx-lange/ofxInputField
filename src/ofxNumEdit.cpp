@@ -120,9 +120,7 @@ bool ofxNumEdit<Type>::mousePressed(ofMouseEventArgs & args){
 
 	}else{
 		if(bGuiActive){
-			bGuiActive = false;
-			pressCounter = 0;
-			//TODO confirm/abort?
+			leaveFocus();
 		}
 	}
 	return false;
@@ -227,6 +225,8 @@ void ofxNumEdit<Type>::keyPressed(ofKeyEventArgs & args){
 			}else{
 				newCursorIdx = selectStartIdx == valueStr.size() ? valueStr.size() : selectStartIdx+1;
 			}
+		}else if(args.key == OF_KEY_RETURN){
+			leaveFocus();
 		}
 
 		if(newCursorIdx != -1){
@@ -379,6 +379,15 @@ void ofxNumEdit<Type>::valueChanged(Type & value){
 	}
     valueStrWidth = getTextBoundingBox(valueStr,0,0).width;
     setNeedsRedraw();
+}
+
+template<typename Type>
+void ofxNumEdit<Type>::leaveFocus(){
+	bGuiActive = false;
+	pressCounter = 0;
+	valueStr = ofToString(value);
+	valueStrWidth = getTextBoundingBox(valueStr,0,0).width;
+	setNeedsRedraw();
 }
 
 template class ofxNumEdit<int>;

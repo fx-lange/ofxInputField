@@ -6,7 +6,6 @@
 /*
  * TODO
  * floating point (multiple)
- * ENTER
  * check min/max
  * crash?
  * no key spam
@@ -85,6 +84,8 @@ protected:
 	void calculateSelectionArea();
 
 	int pressCounter;
+
+	void leaveFocus();
 };
 
 typedef ofxNumEdit<float> ofxFloatNumEdit;
