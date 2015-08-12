@@ -191,17 +191,19 @@ void ofxNumEdit<Type>::keyPressed(ofKeyEventArgs & args){
 				selectEndIx = selectStartIdx;
 				value = ofToFloat(valueStr);
 			}else{
-				//TODO refactor!!
-				if(args.key == OF_KEY_BACKSPACE && selectStartIdx > 0){
-					valueStr.erase(selectStartIdx-1,1);
-					selectEndIx = selectStartIdx = selectStartIdx - 1;
-					value = ofToFloat(valueStr);
+				int deleteIdx = -1;
+				if(args.key == OF_KEY_BACKSPACE){
+					deleteIdx = selectStartIdx-1;
 				}else if(args.key == OF_KEY_DEL){
-					valueStr.erase(selectStartIdx,1);
-					selectEndIx = selectStartIdx;
-					value = ofToFloat(valueStr);
+					deleteIdx = selectStartIdx;
 				}
 
+				//erase char if valid deleteIdx
+				if(deleteIdx >= 0 && deleteIdx < valueStr.size()){
+					valueStr.erase(deleteIdx,1);
+					selectEndIx = selectStartIdx = deleteIdx;
+					value = ofToFloat(valueStr);
+				}
 			}
 		}
 		selectWidth = 0; //TODO recalc everything via setCursor or so
