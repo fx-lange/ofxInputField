@@ -107,16 +107,12 @@ bool ofxNumEdit<Type>::mousePressed(ofMouseEventArgs & args){
 	if(b.inside(args.x,args.y)){
 		bMousePressed = true;
 		if(!bGuiActive){
-			selectIdx1 = 0;
-			selectIdx2 = valueStr.size();
-
 			bGuiActive = true;
-		}else{
-			float cursorX = args.x - (b.x + b.width - textPadding - valueStrWidth);
-			int cursorIdx = ofMap(cursorX,0,valueStrWidth,0,valueStr.size(),true);
-			selectIdx1 = selectIdx2 = cursorIdx;
 		}
-		//TODO else double click
+
+		float cursorX = args.x - (b.x + b.width - textPadding - valueStrWidth);
+		int cursorIdx = ofMap(cursorX,0,valueStrWidth,0,valueStr.size(),true);
+		selectIdx1 = selectIdx2 = cursorIdx;
 
 		calculateSelectionArea();
 
@@ -134,7 +130,7 @@ bool ofxNumEdit<Type>::mousePressed(ofMouseEventArgs & args){
 
 template<typename Type>
 bool ofxNumEdit<Type>::mouseDragged(ofMouseEventArgs & args){
-	if(pressCounter <= 1) //no select on drag while select all
+	if(!bGuiActive || !bMousePressed)
 		return false;
 
 	float cursorX = args.x - (b.x + b.width - textPadding - valueStrWidth);
@@ -149,6 +145,15 @@ bool ofxNumEdit<Type>::mouseReleased(ofMouseEventArgs & args){
 //	if(bUpdateOnEnterOnly){
 //		value.enableEvents();
 //	}
+	if(bGuiActive){
+		if(pressCounter == 1 && !hasSelectionArea()){
+			//activated panel without selecting an area => select all
+			selectIdx1 = 0;
+			selectIdx2 = valueStr.size();
+			calculateSelectionArea();
+		}
+	}
+
 	bMousePressed = false;
 	return false;
 }
