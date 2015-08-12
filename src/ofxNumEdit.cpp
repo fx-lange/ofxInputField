@@ -262,7 +262,7 @@ getRange(Type min, Type max, float width){
 
 template<typename Type>
 bool ofxNumEdit<Type>::mouseScrolled(ofMouseEventArgs & args){
-	if(mouseInside){
+	if(mouseInside || bGuiActive){
 		if(args.y>0 || args.y<0){
 			double range = getRange(value.getMin(),value.getMax(),b.width);
 			Type newValue = value + ofMap(args.y,-1,1,-range, range);
@@ -374,10 +374,15 @@ template<typename Type>
 void ofxNumEdit<Type>::valueChanged(Type & value){
 	if(bChangedInternally){
 		bChangedInternally = false;
+		valueStrWidth = getTextBoundingBox(valueStr,0,0).width;
 	}else{
 		valueStr = ofToString(value);
+		valueStrWidth = getTextBoundingBox(valueStr,0,0).width;
+		if(bGuiActive){
+			selectIdx1 = selectIdx2 = valueStr.size();
+			calculateSelectionArea();
+		}
 	}
-    valueStrWidth = getTextBoundingBox(valueStr,0,0).width;
     setNeedsRedraw();
 }
 

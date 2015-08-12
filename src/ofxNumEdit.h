@@ -5,7 +5,6 @@
 
 /*
  * TODO
- * floating point (multiple)
  * check min/max
  * crash?
  * no key spam
