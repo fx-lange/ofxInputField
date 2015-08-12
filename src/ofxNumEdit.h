@@ -80,7 +80,7 @@ protected:
 	bool hasSelectionArea(){ return selectIdx1 != selectIdx2; }
 
 	float selectStartX, selectWidth; //calculated from select indices
-	int selectStartIdx, selectEndIx;
+	int selectStartIdx, selectEndIdx;
 	void calculateSelectionArea();
 
 	int pressCounter;

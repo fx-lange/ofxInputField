@@ -74,10 +74,10 @@ void ofxNumEdit<Type>::calculateSelectionArea(){
 
 	if(selectIdx1 <= selectIdx2){
 		selectStartIdx = selectIdx1;
-		selectEndIx = selectIdx2;
+		selectEndIdx = selectIdx2;
 	}else{
 		selectStartIdx = selectIdx2;
-		selectEndIx = selectIdx1;
+		selectEndIdx = selectIdx1;
 	}
 
 	float preSelectWidth = 0;
@@ -88,7 +88,7 @@ void ofxNumEdit<Type>::calculateSelectionArea(){
 	selectStartX = b.width - textPadding - valueStrWidth + preSelectWidth;
 
 	if(hasSelectionArea()){
-		selectStr.assign(valueStr,selectStartIdx,selectEndIx-selectStartIdx);
+		selectStr.assign(valueStr,selectStartIdx,selectEndIdx-selectStartIdx);
 		selectWidth = getTextBoundingBox(selectStr,0,0).width;
 	}
 }
@@ -186,14 +186,14 @@ void ofxNumEdit<Type>::keyPressed(ofKeyEventArgs & args){
 		if(args.key >= '0' && args.key <= '9'){
 			int digit = args.key - '0';
 			if(hasSelectionArea()){
-				valueStr.erase(selectStartIdx,selectEndIx-selectStartIdx);
+				valueStr.erase(selectStartIdx,selectEndIdx-selectStartIdx);
 			}
 			valueStr.insert(selectStartIdx,ofToString(digit));
 			newCursorIdx = selectStartIdx + 1;
 			value = ofToFloat(valueStr);
 		}else if(args.key == OF_KEY_BACKSPACE || args.key == OF_KEY_DEL){
 			if(hasSelectionArea()){
-				valueStr.erase(selectStartIdx,selectEndIx-selectStartIdx);
+				valueStr.erase(selectStartIdx,selectEndIdx-selectStartIdx);
 				newCursorIdx = selectStartIdx;
 				value = ofToFloat(valueStr);
 			}else{
@@ -211,7 +211,20 @@ void ofxNumEdit<Type>::keyPressed(ofKeyEventArgs & args){
 					value = ofToFloat(valueStr);
 				}
 			}
+		}else if(args.key == OF_KEY_LEFT){
+			if(hasSelectionArea()){
+				newCursorIdx = selectStartIdx;
+			}else{
+				newCursorIdx = selectStartIdx == 0 ? 0 : selectStartIdx-1;
+			}
+		}else if(args.key == OF_KEY_RIGHT){
+			if(hasSelectionArea()){
+				newCursorIdx = selectEndIdx;
+			}else{
+				newCursorIdx = selectStartIdx == valueStr.size() ? valueStr.size() : selectStartIdx+1;
+			}
 		}
+
 		if(newCursorIdx != -1){
 			//set cursor
 			selectIdx1 = selectIdx2 = newCursorIdx;
