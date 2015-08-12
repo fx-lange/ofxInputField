@@ -3,13 +3,6 @@
 #include "ofxBaseGui.h"
 #include "ofParameter.h"
 
-/*
- * TODO
- * check min/max
- * crash?
- * no key spam
- * */
-
 template<typename Type>
 class ofxNumEdit : public ofxBaseGui{
 	friend class ofPanel;

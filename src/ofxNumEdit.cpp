@@ -367,7 +367,14 @@ void ofxNumEdit<Type>::setUpdateOnEnterOnly(bool _bUpdateOnEnterOnly){
 template<typename Type>
 void ofxNumEdit<Type>::setValue(std::string valStr){
 	bChangedInternally = true;
-	value = ofToFloat(valStr);
+	Type tmpVal = ofToFloat(valStr);
+	cout << tmpVal << endl;
+	if(tmpVal < getMin()){
+		tmpVal = getMin();
+	}else if(tmpVal > getMax()){
+		tmpVal = getMax();
+	}
+	value = tmpVal;
 }
 
 template<typename Type>
