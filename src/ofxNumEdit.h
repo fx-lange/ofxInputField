@@ -5,12 +5,11 @@
 
 /*
  * TODO
+ * floating point (multiple)
+ * ENTER
+ * check min/max
  * crash?
  * no key spam
- * LEFT/RIGHT
- * ENTER
- * floating point
- * check min/max
  * */
 
 template<typename Type>
@@ -75,6 +74,8 @@ protected:
 
 	std::string valueStr;
 	float valueStrWidth;
+	void setValue(std::string valStr);
+	bool bChangedInternally;
 
 	int selectIdx1, selectIdx2; //set by mouse interaction
 	bool hasSelectionArea(){ return selectIdx1 != selectIdx2; }

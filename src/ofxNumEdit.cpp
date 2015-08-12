@@ -190,12 +190,16 @@ void ofxNumEdit<Type>::keyPressed(ofKeyEventArgs & args){
 			}
 			valueStr.insert(selectStartIdx,ofToString(digit));
 			newCursorIdx = selectStartIdx + 1;
-			value = ofToFloat(valueStr);
+			setValue(valueStr);
+		}else if(args.key == '.' || args.key == ',' ){
+			valueStr.insert(selectStartIdx,".");
+			newCursorIdx = selectStartIdx + 1;
+			setValue(valueStr);
 		}else if(args.key == OF_KEY_BACKSPACE || args.key == OF_KEY_DEL){
 			if(hasSelectionArea()){
 				valueStr.erase(selectStartIdx,selectEndIdx-selectStartIdx);
 				newCursorIdx = selectStartIdx;
-				value = ofToFloat(valueStr);
+				setValue(valueStr);
 			}else{
 				int deleteIdx = -1;
 				if(args.key == OF_KEY_BACKSPACE){
@@ -208,7 +212,7 @@ void ofxNumEdit<Type>::keyPressed(ofKeyEventArgs & args){
 				if(deleteIdx >= 0 && deleteIdx < valueStr.size()){
 					valueStr.erase(deleteIdx,1);
 					newCursorIdx = deleteIdx;
-					value = ofToFloat(valueStr);
+					setValue(valueStr);
 				}
 			}
 		}else if(args.key == OF_KEY_LEFT){
@@ -296,14 +300,7 @@ void ofxNumEdit<Type>::generateDraw(){
 
 template<typename Type>
 void ofxNumEdit<Type>::generateText(){
-	string valStr = ofToString(value);
-	textMesh = getTextMesh(getName(), b.x + textPadding, b.y + b.height / 2 + 4);
-	textMesh.append(getTextMesh(valStr, b.x + b.width - textPadding - getTextBoundingBox(valStr,0,0).width, b.y + b.height / 2 + 4));
-}
-
-template<>
-void ofxNumEdit<unsigned char>::generateText(){
-	string valStr = ofToString((int)value);
+	string valStr = valueStr;
 	textMesh = getTextMesh(getName(), b.x + textPadding, b.y + b.height / 2 + 4);
 	textMesh.append(getTextMesh(valStr, b.x + b.width - textPadding - getTextBoundingBox(valStr,0,0).width, b.y + b.height / 2 + 4));
 }
@@ -328,8 +325,8 @@ void ofxNumEdit<Type>::render(){
 			ofFill();
 			ofDrawRectangle(selectStartX+b.x,b.y+1,selectWidth,b.height-2);
 		}else{
-			ofSetColor(thisFillColor);
-			ofDrawLine(selectStartX+b.x,b.y+1,selectStartX+b.x,b.y+b.height-2);
+			ofSetColor(thisTextColor);
+			ofDrawLine(selectStartX+b.x,b.y,selectStartX+b.x,b.y+b.height);
 		}
 		ofPopStyle();
 	}
@@ -368,8 +365,18 @@ void ofxNumEdit<Type>::setUpdateOnEnterOnly(bool _bUpdateOnEnterOnly){
 }
 
 template<typename Type>
+void ofxNumEdit<Type>::setValue(std::string valStr){
+	bChangedInternally = true;
+	value = ofToFloat(valStr);
+}
+
+template<typename Type>
 void ofxNumEdit<Type>::valueChanged(Type & value){
-    valueStr = ofToString(value);
+	if(bChangedInternally){
+		bChangedInternally = false;
+	}else{
+		valueStr = ofToString(value);
+	}
     valueStrWidth = getTextBoundingBox(valueStr,0,0).width;
     setNeedsRedraw();
 }
