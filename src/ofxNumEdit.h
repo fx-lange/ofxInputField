@@ -10,6 +10,7 @@
  * LEFT/RIGHT
  * ENTER
  * floating point
+ * check min/max
  * */
 
 template<typename Type>

@@ -177,18 +177,19 @@ void ofxNumEdit<Type>::keyPressed(ofKeyEventArgs & args){
 	if(bGuiActive && !bMousePressed){
 		ofLogNotice("keyPressed") << args.key;
 
+		int newCursorIdx = -1;
 		if(args.key >= '0' && args.key <= '9'){
 			int digit = args.key - '0';
 			if(hasSelectionArea()){
 				valueStr.erase(selectStartIdx,selectEndIx-selectStartIdx);
 			}
 			valueStr.insert(selectStartIdx,ofToString(digit));
-			selectEndIx = selectStartIdx = selectStartIdx + 1;
+			newCursorIdx = selectStartIdx + 1;
 			value = ofToFloat(valueStr);
 		}else if(args.key == OF_KEY_BACKSPACE || args.key == OF_KEY_DEL){
 			if(hasSelectionArea()){
 				valueStr.erase(selectStartIdx,selectEndIx-selectStartIdx);
-				selectEndIx = selectStartIdx;
+				newCursorIdx = selectStartIdx;
 				value = ofToFloat(valueStr);
 			}else{
 				int deleteIdx = -1;
@@ -201,12 +202,16 @@ void ofxNumEdit<Type>::keyPressed(ofKeyEventArgs & args){
 				//erase char if valid deleteIdx
 				if(deleteIdx >= 0 && deleteIdx < valueStr.size()){
 					valueStr.erase(deleteIdx,1);
-					selectEndIx = selectStartIdx = deleteIdx;
+					newCursorIdx = deleteIdx;
 					value = ofToFloat(valueStr);
 				}
 			}
 		}
-		selectWidth = 0; //TODO recalc everything via setCursor or so
+		if(newCursorIdx != -1){
+			//set cursor
+			selectIdx1 = selectIdx2 = newCursorIdx;
+			calculateSelectionArea();
+		}
 	}
 }
 
