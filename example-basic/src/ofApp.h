@@ -30,12 +30,13 @@ public:
 	bool bHide;
 
 	ofxFloatField radius;
+	ofxIntField circleResolution;
+	ofxInputField<string> screenSize;
+
 	ofxColorSlider color;
 	ofxVec2Slider center;
-	ofxIntField circleResolution;
 	ofxToggle filled;
 	ofxButton twoCircles;
-	ofxLabel screenSize;
 
 	ofxPanel gui;
 };

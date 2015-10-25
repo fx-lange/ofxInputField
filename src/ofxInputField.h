@@ -11,7 +11,8 @@ public:
 	~ofxInputField();
 	ofxInputField(ofParameter<Type> _val, float width = defaultWidth, float height = defaultHeight);
 	ofxInputField* setup(ofParameter<Type> _val, float width = defaultWidth, float height = defaultHeight);
-	ofxInputField* setup(const std::string& numEditName, Type _val, Type _min, Type _max, float width = defaultWidth, float height = defaultHeight);
+	ofxInputField* setup(const std::string& _name, Type _val, Type _min, Type _max, float width = defaultWidth, float height = defaultHeight);
+	ofxInputField* setup(const std::string& _name, Type _val);
 	
 	void setMin(Type min);
 	Type getMin();
@@ -27,8 +28,8 @@ public:
     void registerKeyEvents();
     void unregisterKeyEvents();
 
-    virtual void keyPressed(ofKeyEventArgs & args);
-    virtual void keyReleased(ofKeyEventArgs & args);
+    virtual bool keyPressed(ofKeyEventArgs & args);
+    virtual bool keyReleased(ofKeyEventArgs & args);
 
 	template<class ListenerClass, typename ListenerMethod>
 	void addListener(ListenerClass * listener, ListenerMethod method){
@@ -40,7 +41,7 @@ public:
 		value.removeListener(listener,method);
 	}
 
-	double operator=(Type v);
+	Type operator=(Type v);
 	operator const Type & ();
 
 	ofAbstractParameter & getParameter();
@@ -61,20 +62,22 @@ protected:
 
 	std::string input;
 	float inputWidth;
-	void parseInput();
 	bool bChangedInternally;
+	void parseInput();
+	int insertKeystroke(const std::string & character);
+	int insertAlphabetic(const std::string & character);
 
 	int mousePressedPos; //set by mouse interaction
 	bool hasSelectedText();
+
+	float selectStartX, selectionWidth; //calculated from select indices
+	int selectStartPos, selectEndPos;
+	void calculateSelectionArea(int selectIdx1, int selectIdx2);
 
 	virtual void drawSelectedArea();
 	virtual void drawCursor();
 	virtual void drawFocusedBB();
 	virtual void drawMesh();
-
-	float selectStartX, selectionWidth; //calculated from select indices
-	int selectStartPos, selectEndPos;
-	void calculateSelectionArea(int selectIdx1, int selectIdx2);
 
 	int pressCounter;
 

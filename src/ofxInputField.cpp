@@ -29,6 +29,7 @@ ofxInputField<Type>::ofxInputField(ofParameter<Type> _val, float width, float he
 }
 
 template<typename Type>
+
 ofxInputField<Type>* ofxInputField<Type>::setup(ofParameter<Type> _val, float width, float height){
 	value.makeReferenceTo(_val);
 	input = ofToString(value);
@@ -48,9 +49,15 @@ ofxInputField<Type>* ofxInputField<Type>::setup(ofParameter<Type> _val, float wi
 }
 
 template<typename Type>
-ofxInputField<Type>* ofxInputField<Type>::setup(const std::string& numEditName, Type _val, Type _min, Type _max, float width, float height){
-	value.set(numEditName,_val,_min,_max);
+ofxInputField<Type>* ofxInputField<Type>::setup(const std::string& _name, Type _val, Type _min, Type _max, float width, float height){
+	value.set(_name,_val,_min,_max);
 	return setup(value,width,height);
+}
+
+template<typename Type>
+ofxInputField<Type>* ofxInputField<Type>::setup(const std::string& _name, Type _val){
+	value.set(_name,_val);
+	return setup(value);
 }
 
 template<typename Type>
@@ -174,23 +181,16 @@ void ofxInputField<Type>::unregisterKeyEvents(){
 }
 
 template<typename Type>
-void ofxInputField<Type>::keyPressed(ofKeyEventArgs & args){
+bool ofxInputField<Type>::keyPressed(ofKeyEventArgs & args){
 	if(bGuiActive && !bMousePressed){
 		ofLogNotice("ofxInputField::keyPressed") << args.key;
 
 		int newCursorIdx = -1;
 		if(args.key >= '0' && args.key <= '9'){
 			int digit = args.key - '0';
-			if(hasSelectedText()){
-				input.erase(selectStartPos,selectEndPos-selectStartPos);
-			}
-			input.insert(selectStartPos,ofToString(digit));
-			newCursorIdx = selectStartPos + 1;
-			parseInput();
-		}else if(args.key == '.' || args.key == ',' ){
-			input.insert(selectStartPos,".");
-			newCursorIdx = selectStartPos + 1;
-			parseInput();
+			newCursorIdx = insertKeystroke(ofToString(digit));
+		}else if(args.key == '.' ){
+			newCursorIdx = insertKeystroke(".");
 		}else if(args.key == OF_KEY_BACKSPACE || args.key == OF_KEY_DEL){
 			if(hasSelectedText()){
 				input.erase(selectStartPos,selectEndPos-selectStartPos);
@@ -225,22 +225,44 @@ void ofxInputField<Type>::keyPressed(ofKeyEventArgs & args){
 			}
 		}else if(args.key == OF_KEY_RETURN){
 			leaveFocus();
+		}else{
+			newCursorIdx = insertAlphabetic(ofToString((char)args.key));
 		}
 
 		if(newCursorIdx != -1){
 			//set cursor
 			calculateSelectionArea(newCursorIdx,newCursorIdx);
 		}
+		return true;
 	}
+	return false;
 }
 
 template<typename Type>
-void ofxInputField<Type>::keyReleased(ofKeyEventArgs & args){
-	if(bGuiActive){
-		ofLogNotice("ofxInputField::keyReleased") << args.key;
-	}
+bool ofxInputField<Type>::keyReleased(ofKeyEventArgs & args){
+	return bGuiActive && !bMousePressed;
 }
 
+
+template<typename Type>
+int ofxInputField<Type>::insertKeystroke(const std::string & character){
+	if(hasSelectedText()){
+		input.erase(selectStartPos,selectEndPos-selectStartPos);
+	}
+	input.insert(selectStartPos,character);
+	parseInput();
+	return selectStartPos + 1;
+}
+
+template<typename Type>
+int ofxInputField<Type>::insertAlphabetic(const std::string & character){
+	return -1; //cursor or selection area stay the same
+}
+
+template<>
+int ofxInputField<string>::insertAlphabetic(const std::string & character){
+	return insertKeystroke(character);
+}
 
 
 template<typename Type>
@@ -274,8 +296,17 @@ bool ofxInputField<Type>::mouseScrolled(ofMouseEventArgs & args){
 	}
 }
 
+template<>
+bool ofxInputField<string>::mouseScrolled(ofMouseEventArgs & args){
+	if(mouseInside || bGuiActive){
+		return true;
+	}else{
+		return false;
+	}
+}
+
 template<typename Type>
-double ofxInputField<Type>::operator=(Type v){
+Type ofxInputField<Type>::operator=(Type v){
 	value = v;
 	return v;
 }
@@ -392,6 +423,12 @@ void ofxInputField<Type>::parseInput(){
 	value = tmpVal;
 }
 
+template<>
+void ofxInputField<string>::parseInput(){
+	bChangedInternally = true;
+	value = input;
+}
+
 template<typename Type>
 void ofxInputField<Type>::valueChanged(Type & value){
 	if(bChangedInternally){
@@ -417,11 +454,14 @@ void ofxInputField<Type>::leaveFocus(){
 	setNeedsRedraw();
 }
 
-template class ofxInputField<int>;
-template class ofxInputField<unsigned int>;
+template class ofxInputField<int8_t>;
+template class ofxInputField<uint8_t>;
+template class ofxInputField<int16_t>;
+template class ofxInputField<uint16_t>;
+template class ofxInputField<int32_t>;
+template class ofxInputField<uint32_t>;
+template class ofxInputField<int64_t>;
+template class ofxInputField<uint64_t>;
 template class ofxInputField<float>;
 template class ofxInputField<double>;
-template class ofxInputField<signed char>;
-template class ofxInputField<unsigned char>;
-template class ofxInputField<unsigned short>;
-template class ofxInputField<short>;
+template class ofxInputField<string>;
