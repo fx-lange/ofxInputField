@@ -4,12 +4,20 @@ using namespace std;
 
 template<typename Type>
 ofxNumEdit<Type>::ofxNumEdit(){
+	bChangedInternally = false;
 	bUpdateOnEnterOnly = false;
-	bGuiActive = bMousePressed = false;
+	bGuiActive = false;
+	bMousePressed = false;
 	mouseInside = false;
 	bRegisteredForKeyEvents = false;
-	selectIdx1 = selectIdx2 = -1;
+	selectIdx1 = -1;
+	selectIdx2 = -1;
+	selectStartX = -1;
+	selectStartIdx = -1;
+	selectEndIdx = -1;
 	pressCounter = 0;
+	valueStrWidth = 0;
+	selectWidth = 0;
 }
 
 template<typename Type>

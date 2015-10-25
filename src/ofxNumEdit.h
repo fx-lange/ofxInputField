@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ofxBaseGui.h"
-#include "ofParameter.h"
 
 template<typename Type>
 class ofxNumEdit : public ofxBaseGui{
