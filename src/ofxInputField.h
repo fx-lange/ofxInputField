@@ -3,15 +3,15 @@
 #include "ofxBaseGui.h"
 
 template<typename Type>
-class ofxNumEdit : public ofxBaseGui{
+class ofxInputField : public ofxBaseGui{
 	friend class ofPanel;
 	
 public:	
-	ofxNumEdit();
-	~ofxNumEdit();
-	ofxNumEdit(ofParameter<Type> _val, float width = defaultWidth, float height = defaultHeight);
-	ofxNumEdit* setup(ofParameter<Type> _val, float width = defaultWidth, float height = defaultHeight);
-	ofxNumEdit* setup(const std::string& numEditName, Type _val, Type _min, Type _max, float width = defaultWidth, float height = defaultHeight);
+	ofxInputField();
+	~ofxInputField();
+	ofxInputField(ofParameter<Type> _val, float width = defaultWidth, float height = defaultHeight);
+	ofxInputField* setup(ofParameter<Type> _val, float width = defaultWidth, float height = defaultHeight);
+	ofxInputField* setup(const std::string& numEditName, Type _val, Type _min, Type _max, float width = defaultWidth, float height = defaultHeight);
 	
 	void setMin(Type min);
 	Type getMin();
@@ -59,8 +59,8 @@ protected:
 
 	bool bRegisteredForKeyEvents;
 
-	std::string valueStr;
-	float valueStrWidth;
+	std::string inputValue;
+	float inputValueWidth;
 	void setValue(std::string valStr);
 	bool bChangedInternally;
 
@@ -72,7 +72,7 @@ protected:
 	virtual void drawFocusedBB();
 	virtual void drawMesh();
 
-	float selectStartX, selectWidth; //calculated from select indices
+	float selectStartX, selectionWidth; //calculated from select indices
 	int selectStartPos, selectEndPos;
 	void calculateSelectionArea(int selectIdx1, int selectIdx2);
 
@@ -81,5 +81,5 @@ protected:
 	void leaveFocus();
 };
 
-typedef ofxNumEdit<float> ofxFloatNumEdit;
-typedef ofxNumEdit<int> ofxIntNumEdit;
+typedef ofxInputField<float> ofxFloatNumEdit;
+typedef ofxInputField<int> ofxIntNumEdit;

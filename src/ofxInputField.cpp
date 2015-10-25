@@ -1,9 +1,9 @@
-#include "ofxNumEdit.h"
+#include "ofxInputField.h"
 
 #include "ofGraphics.h"
 
 template<typename Type>
-ofxNumEdit<Type>::ofxNumEdit(){
+ofxInputField<Type>::ofxInputField(){
 	bChangedInternally = false;
 	bGuiActive = false;
 	bMousePressed = false;
@@ -14,25 +14,25 @@ ofxNumEdit<Type>::ofxNumEdit(){
 	selectStartPos = -1;
 	selectEndPos = -1;
 	pressCounter = 0;
-	valueStrWidth = 0;
-	selectWidth = 0;
+	inputValueWidth = 0;
+	selectionWidth = 0;
 }
 
 template<typename Type>
-ofxNumEdit<Type>::~ofxNumEdit(){
-	value.removeListener(this,&ofxNumEdit::valueChanged);
+ofxInputField<Type>::~ofxInputField(){
+	value.removeListener(this,&ofxInputField::valueChanged);
 }
 
 template<typename Type>
-ofxNumEdit<Type>::ofxNumEdit(ofParameter<Type> _val, float width, float height){
+ofxInputField<Type>::ofxInputField(ofParameter<Type> _val, float width, float height){
 	setup(_val,width,height);
 }
 
 template<typename Type>
-ofxNumEdit<Type>* ofxNumEdit<Type>::setup(ofParameter<Type> _val, float width, float height){
+ofxInputField<Type>* ofxInputField<Type>::setup(ofParameter<Type> _val, float width, float height){
 	value.makeReferenceTo(_val);
-	valueStr = ofToString(value);
-	valueStrWidth = getTextBoundingBox(valueStr,0,0).width;
+	inputValue = ofToString(value);
+	inputValueWidth = getTextBoundingBox(inputValue,0,0).width;
 	b.x = 0;
 	b.y = 0;
 	b.width = width;
@@ -40,7 +40,7 @@ ofxNumEdit<Type>* ofxNumEdit<Type>::setup(ofParameter<Type> _val, float width, f
 	bGuiActive = false;
 	setNeedsRedraw();
 
-	value.addListener(this,&ofxNumEdit::valueChanged);
+	value.addListener(this,&ofxInputField::valueChanged);
 	registerMouseEvents();
 	registerKeyEvents();
 	pressCounter = 0;
@@ -48,33 +48,33 @@ ofxNumEdit<Type>* ofxNumEdit<Type>::setup(ofParameter<Type> _val, float width, f
 }
 
 template<typename Type>
-ofxNumEdit<Type>* ofxNumEdit<Type>::setup(const std::string& numEditName, Type _val, Type _min, Type _max, float width, float height){
+ofxInputField<Type>* ofxInputField<Type>::setup(const std::string& numEditName, Type _val, Type _min, Type _max, float width, float height){
 	value.set(numEditName,_val,_min,_max);
 	return setup(value,width,height);
 }
 
 template<typename Type>
-void ofxNumEdit<Type>::setMin(Type min){
+void ofxInputField<Type>::setMin(Type min){
     value.setMin(min);
 }
 
 template<typename Type>
-Type ofxNumEdit<Type>::getMin(){
+Type ofxInputField<Type>::getMin(){
     return value.getMin();
 }
 
 template<typename Type>
-void ofxNumEdit<Type>::setMax(Type max){
+void ofxInputField<Type>::setMax(Type max){
     value.setMax(max);
 }
 
 template<typename Type>
-Type ofxNumEdit<Type>::getMax(){
+Type ofxInputField<Type>::getMax(){
     return value.getMax();
 }
 
 template<typename Type>
-void ofxNumEdit<Type>::calculateSelectionArea(int selectIdx1, int selectIdx2){
+void ofxInputField<Type>::calculateSelectionArea(int selectIdx1, int selectIdx2){
 	std::string preSelectStr, selectStr;
 
 	if(selectIdx1 <= selectIdx2){
@@ -87,33 +87,33 @@ void ofxNumEdit<Type>::calculateSelectionArea(int selectIdx1, int selectIdx2){
 
 	float preSelectWidth = 0;
 	if(selectStartPos > 0){
-		preSelectStr.assign(valueStr,0,selectStartPos);
+		preSelectStr.assign(inputValue,0,selectStartPos);
 		preSelectWidth = getTextBoundingBox(preSelectStr,0,0).width;
 	}
-	selectStartX = b.width - textPadding - valueStrWidth + preSelectWidth;
+	selectStartX = b.width - textPadding - inputValueWidth + preSelectWidth;
 
 	if(hasSelectedText()){
-		selectStr.assign(valueStr,selectStartPos,selectEndPos-selectStartPos);
-		selectWidth = getTextBoundingBox(selectStr,0,0).width;
+		selectStr.assign(inputValue,selectStartPos,selectEndPos-selectStartPos);
+		selectionWidth = getTextBoundingBox(selectStr,0,0).width;
 	}
 }
 
 template<typename Type>
-bool ofxNumEdit<Type>::mouseMoved(ofMouseEventArgs & args){
+bool ofxInputField<Type>::mouseMoved(ofMouseEventArgs & args){
 	mouseInside = isGuiDrawing() && b.inside(ofPoint(args.x,args.y));
 	return mouseInside;
 }
 
 template<typename Type>
-bool ofxNumEdit<Type>::mousePressed(ofMouseEventArgs & args){
+bool ofxInputField<Type>::mousePressed(ofMouseEventArgs & args){
 	if(b.inside(args.x,args.y)){
 		bMousePressed = true;
 		if(!bGuiActive){
 			bGuiActive = true;
 		}
 
-		float cursorX = args.x - (b.x + b.width - textPadding - valueStrWidth);
-		int cursorPos = ofMap(cursorX,0,valueStrWidth,0,valueStr.size(),true);
+		float cursorX = args.x - (b.x + b.width - textPadding - inputValueWidth);
+		int cursorPos = ofMap(cursorX,0,inputValueWidth,0,inputValue.size(),true);
 		mousePressedPos = cursorPos;
 
 		calculateSelectionArea(cursorPos, cursorPos);
@@ -129,25 +129,25 @@ bool ofxNumEdit<Type>::mousePressed(ofMouseEventArgs & args){
 }
 
 template<typename Type>
-bool ofxNumEdit<Type>::mouseDragged(ofMouseEventArgs & args){
+bool ofxInputField<Type>::mouseDragged(ofMouseEventArgs & args){
 	if(!bGuiActive || !bMousePressed)
 		return false;
 
-	float cursorX = args.x - (b.x + b.width - textPadding - valueStrWidth);
-	int cursorPos = ofMap(cursorX,0,valueStrWidth,0,valueStr.size(),true);
+	float cursorX = args.x - (b.x + b.width - textPadding - inputValueWidth);
+	int cursorPos = ofMap(cursorX,0,inputValueWidth,0,inputValue.size(),true);
 	calculateSelectionArea(mousePressedPos,cursorPos);
 	return false;
 }
 
 template<typename Type>
-bool ofxNumEdit<Type>::mouseReleased(ofMouseEventArgs & args){
+bool ofxInputField<Type>::mouseReleased(ofMouseEventArgs & args){
 //	if(bUpdateOnEnterOnly){
 //		value.enableEvents();
 //	}
 	if(bGuiActive){
 		if(pressCounter == 1 && !hasSelectedText()){
 			//activated panel without selecting an area => select all
-			calculateSelectionArea(0, valueStr.size());
+			calculateSelectionArea(0, inputValue.size());
 		}
 	}
 
@@ -156,7 +156,7 @@ bool ofxNumEdit<Type>::mouseReleased(ofMouseEventArgs & args){
 }
 
 template<typename Type>
-void ofxNumEdit<Type>::registerKeyEvents(){
+void ofxInputField<Type>::registerKeyEvents(){
 	if(bRegisteredForKeyEvents == true){
 		return; // already registered.
 	}
@@ -165,7 +165,7 @@ void ofxNumEdit<Type>::registerKeyEvents(){
 }
 
 template<typename Type>
-void ofxNumEdit<Type>::unregisterKeyEvents(){
+void ofxInputField<Type>::unregisterKeyEvents(){
 	if(bRegisteredForKeyEvents == false){
 		return; // not registered.
 	}
@@ -174,28 +174,28 @@ void ofxNumEdit<Type>::unregisterKeyEvents(){
 }
 
 template<typename Type>
-void ofxNumEdit<Type>::keyPressed(ofKeyEventArgs & args){
+void ofxInputField<Type>::keyPressed(ofKeyEventArgs & args){
 	if(bGuiActive && !bMousePressed){
-		ofLogNotice("keyPressed") << args.key;
+		ofLogNotice("ofxInputField::keyPressed") << args.key;
 
 		int newCursorIdx = -1;
 		if(args.key >= '0' && args.key <= '9'){
 			int digit = args.key - '0';
 			if(hasSelectedText()){
-				valueStr.erase(selectStartPos,selectEndPos-selectStartPos);
+				inputValue.erase(selectStartPos,selectEndPos-selectStartPos);
 			}
-			valueStr.insert(selectStartPos,ofToString(digit));
+			inputValue.insert(selectStartPos,ofToString(digit));
 			newCursorIdx = selectStartPos + 1;
-			setValue(valueStr);
+			setValue(inputValue);
 		}else if(args.key == '.' || args.key == ',' ){
-			valueStr.insert(selectStartPos,".");
+			inputValue.insert(selectStartPos,".");
 			newCursorIdx = selectStartPos + 1;
-			setValue(valueStr);
+			setValue(inputValue);
 		}else if(args.key == OF_KEY_BACKSPACE || args.key == OF_KEY_DEL){
 			if(hasSelectedText()){
-				valueStr.erase(selectStartPos,selectEndPos-selectStartPos);
+				inputValue.erase(selectStartPos,selectEndPos-selectStartPos);
 				newCursorIdx = selectStartPos;
-				setValue(valueStr);
+				setValue(inputValue);
 			}else{
 				int deleteIdx = -1;
 				if(args.key == OF_KEY_BACKSPACE){
@@ -205,10 +205,10 @@ void ofxNumEdit<Type>::keyPressed(ofKeyEventArgs & args){
 				}
 
 				//erase char if valid deleteIdx
-				if(deleteIdx >= 0 && deleteIdx < valueStr.size()){
-					valueStr.erase(deleteIdx,1);
+				if(deleteIdx >= 0 && deleteIdx < inputValue.size()){
+					inputValue.erase(deleteIdx,1);
 					newCursorIdx = deleteIdx;
-					setValue(valueStr);
+					setValue(inputValue);
 				}
 			}
 		}else if(args.key == OF_KEY_LEFT){
@@ -221,7 +221,7 @@ void ofxNumEdit<Type>::keyPressed(ofKeyEventArgs & args){
 			if(hasSelectedText()){
 				newCursorIdx = selectEndPos;
 			}else{
-				newCursorIdx = selectStartPos == valueStr.size() ? valueStr.size() : selectStartPos+1;
+				newCursorIdx = selectStartPos == inputValue.size() ? inputValue.size() : selectStartPos+1;
 			}
 		}else if(args.key == OF_KEY_RETURN){
 			leaveFocus();
@@ -235,11 +235,13 @@ void ofxNumEdit<Type>::keyPressed(ofKeyEventArgs & args){
 }
 
 template<typename Type>
-void ofxNumEdit<Type>::keyReleased(ofKeyEventArgs & args){
+void ofxInputField<Type>::keyReleased(ofKeyEventArgs & args){
 	if(bGuiActive){
-		ofLogNotice("keyReleased") << args.key;
+		ofLogNotice("ofxInputField::keyReleased") << args.key;
 	}
 }
+
+
 
 template<typename Type>
 typename std::enable_if<std::is_integral<Type>::value, Type>::type
@@ -258,7 +260,7 @@ getRange(Type min, Type max, float width){
 }
 
 template<typename Type>
-bool ofxNumEdit<Type>::mouseScrolled(ofMouseEventArgs & args){
+bool ofxInputField<Type>::mouseScrolled(ofMouseEventArgs & args){
 	if(mouseInside || bGuiActive){
 		if(args.y>0 || args.y<0){
 			double range = getRange(value.getMin(),value.getMax(),b.width);
@@ -273,18 +275,18 @@ bool ofxNumEdit<Type>::mouseScrolled(ofMouseEventArgs & args){
 }
 
 template<typename Type>
-double ofxNumEdit<Type>::operator=(Type v){
+double ofxInputField<Type>::operator=(Type v){
 	value = v;
 	return v;
 }
 
 template<typename Type>
-ofxNumEdit<Type>::operator const Type & (){
+ofxInputField<Type>::operator const Type & (){
 	return value;
 }
 
 template<typename Type>
-void ofxNumEdit<Type>::generateDraw(){
+void ofxInputField<Type>::generateDraw(){
 	bg.clear();
 
 	bg.setFillColor(thisBackgroundColor);
@@ -296,14 +298,14 @@ void ofxNumEdit<Type>::generateDraw(){
 
 
 template<typename Type>
-void ofxNumEdit<Type>::generateText(){
-	string valStr = valueStr;
+void ofxInputField<Type>::generateText(){
+	string valStr = inputValue;
 	textMesh = getTextMesh(getName(), b.x + textPadding, b.y + b.height / 2 + 4);
 	textMesh.append(getTextMesh(valStr, b.x + b.width - textPadding - getTextBoundingBox(valStr,0,0).width, b.y + b.height / 2 + 4));
 }
 
 template<typename Type>
-void ofxNumEdit<Type>::render(){
+void ofxInputField<Type>::render(){
 	bg.draw();
 
 	if(bGuiActive){
@@ -320,12 +322,12 @@ void ofxNumEdit<Type>::render(){
 }
 
 template<typename Type>
-bool ofxNumEdit<Type>::hasSelectedText(){
+bool ofxInputField<Type>::hasSelectedText(){
 	return selectStartPos != selectEndPos;
 }
 
 template<typename Type>
-void ofxNumEdit<Type>::drawMesh(){
+void ofxInputField<Type>::drawMesh(){
 	ofBlendMode blendMode = ofGetStyle().blendingMode;
 	if(blendMode!=OF_BLENDMODE_ALPHA){
 		ofEnableAlphaBlending();
@@ -344,16 +346,16 @@ void ofxNumEdit<Type>::drawMesh(){
 }
 
 template<typename Type>
-void ofxNumEdit<Type>::drawSelectedArea(){
+void ofxInputField<Type>::drawSelectedArea(){
 	ofPushStyle();
 	ofSetColor(thisFillColor);
 	ofFill();
-	ofDrawRectangle( selectStartX+b.x, b.y+1, selectWidth, b.height-2 );
+	ofDrawRectangle( selectStartX+b.x, b.y+1, selectionWidth, b.height-2 );
 	ofPopStyle();
 }
 
 template<typename Type>
-void ofxNumEdit<Type>::drawCursor(){
+void ofxInputField<Type>::drawCursor(){
 	ofPushStyle();
 	ofSetColor(thisTextColor);
 	ofDrawLine( selectStartX+b.x, b.y, selectStartX+b.x, b.y+b.height );
@@ -361,7 +363,7 @@ void ofxNumEdit<Type>::drawCursor(){
 }
 
 template<typename Type>
-void ofxNumEdit<Type>::drawFocusedBB(){
+void ofxInputField<Type>::drawFocusedBB(){
 	ofPushStyle();
 	ofSetColor(thisTextColor);
 	ofDrawLine( selectStartX+b.x, b.y, selectStartX+b.x, b.y+b.height );
@@ -369,20 +371,19 @@ void ofxNumEdit<Type>::drawFocusedBB(){
 }
 
 template<typename Type>
-bool ofxNumEdit<Type>::setValue(float mx, float my, bool bCheck){
+bool ofxInputField<Type>::setValue(float mx, float my, bool bCheck){
 	return false;
 }
 
 template<typename Type>
-ofAbstractParameter & ofxNumEdit<Type>::getParameter(){
+ofAbstractParameter & ofxInputField<Type>::getParameter(){
 	return value;
 }
 
 template<typename Type>
-void ofxNumEdit<Type>::setValue(std::string valStr){
+void ofxInputField<Type>::setValue(std::string valStr){
 	bChangedInternally = true;
 	Type tmpVal = ofToFloat(valStr);
-	cout << tmpVal << endl;
 	if(tmpVal < getMin()){
 		tmpVal = getMin();
 	}else if(tmpVal > getMax()){
@@ -392,15 +393,15 @@ void ofxNumEdit<Type>::setValue(std::string valStr){
 }
 
 template<typename Type>
-void ofxNumEdit<Type>::valueChanged(Type & value){
+void ofxInputField<Type>::valueChanged(Type & value){
 	if(bChangedInternally){
 		bChangedInternally = false;
-		valueStrWidth = getTextBoundingBox(valueStr,0,0).width;
+		inputValueWidth = getTextBoundingBox(inputValue,0,0).width;
 	}else{
-		valueStr = ofToString(value);
-		valueStrWidth = getTextBoundingBox(valueStr,0,0).width;
+		inputValue = ofToString(value);
+		inputValueWidth = getTextBoundingBox(inputValue,0,0).width;
 		if(bGuiActive){
-			int cursorPos = valueStr.size();
+			int cursorPos = inputValue.size();
 			calculateSelectionArea(cursorPos,cursorPos);
 		}
 	}
@@ -408,19 +409,19 @@ void ofxNumEdit<Type>::valueChanged(Type & value){
 }
 
 template<typename Type>
-void ofxNumEdit<Type>::leaveFocus(){
+void ofxInputField<Type>::leaveFocus(){
 	bGuiActive = false;
 	pressCounter = 0;
-	valueStr = ofToString(value);
-	valueStrWidth = getTextBoundingBox(valueStr,0,0).width;
+	inputValue = ofToString(value);
+	inputValueWidth = getTextBoundingBox(inputValue,0,0).width;
 	setNeedsRedraw();
 }
 
-template class ofxNumEdit<int>;
-template class ofxNumEdit<unsigned int>;
-template class ofxNumEdit<float>;
-template class ofxNumEdit<double>;
-template class ofxNumEdit<signed char>;
-template class ofxNumEdit<unsigned char>;
-template class ofxNumEdit<unsigned short>;
-template class ofxNumEdit<short>;
+template class ofxInputField<int>;
+template class ofxInputField<unsigned int>;
+template class ofxInputField<float>;
+template class ofxInputField<double>;
+template class ofxInputField<signed char>;
+template class ofxInputField<unsigned char>;
+template class ofxInputField<unsigned short>;
+template class ofxInputField<short>;
