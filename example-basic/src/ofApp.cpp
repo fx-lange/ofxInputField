@@ -14,7 +14,7 @@ void ofApp::setup(){
 	gui.add(color.setup("color", ofColor(100, 100, 140), ofColor(0, 0), ofColor(255, 255)));
 	gui.add(circleResolution.setup("circle res", 5, 3, 90));
 	gui.add(twoCircles.setup("two circles"));
-	gui.add(screenSize.setup("screen size", ofToString(ofGetWidth())+"x"+ofToString(ofGetHeight())));
+	gui.add(textField.setup("textfield:", "type sth. here"));
 
 	bHide = false;
 }
@@ -112,7 +112,7 @@ void ofApp::mouseExited(int x, int y){
 
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
-    screenSize = ofToString(w) + "x" + ofToString(h);
+	textField = ofToString(w) + "x" + ofToString(h);
 }
 
 //--------------------------------------------------------------

@@ -31,7 +31,7 @@ public:
 
 	ofxFloatField radius;
 	ofxIntField circleResolution;
-	ofxInputField<string> screenSize;
+	ofxTextField textField;
 
 	ofxColorSlider color;
 	ofxVec2Slider center;
