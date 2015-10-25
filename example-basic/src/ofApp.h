@@ -2,7 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxGui.h"
-#include "ofxNumEdit.h"
+#include "ofxInputField.h"
 
 class ofApp : public ofBaseApp{
 	
@@ -29,15 +29,13 @@ public:
 
 	bool bHide;
 
-	ofxFloatNumEdit radius;
+	ofxFloatField radius;
 	ofxColorSlider color;
 	ofxVec2Slider center;
-	ofxIntNumEdit circleResolution;
+	ofxIntField circleResolution;
 	ofxToggle filled;
 	ofxButton twoCircles;
 	ofxLabel screenSize;
-	ofxNumEdit<float> label;
-
 
 	ofxPanel gui;
 };

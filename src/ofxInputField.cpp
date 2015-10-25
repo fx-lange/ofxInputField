@@ -14,7 +14,7 @@ ofxInputField<Type>::ofxInputField(){
 	selectStartPos = -1;
 	selectEndPos = -1;
 	pressCounter = 0;
-	inputValueWidth = 0;
+	inputWidth = 0;
 	selectionWidth = 0;
 }
 
@@ -31,8 +31,8 @@ ofxInputField<Type>::ofxInputField(ofParameter<Type> _val, float width, float he
 template<typename Type>
 ofxInputField<Type>* ofxInputField<Type>::setup(ofParameter<Type> _val, float width, float height){
 	value.makeReferenceTo(_val);
-	inputValue = ofToString(value);
-	inputValueWidth = getTextBoundingBox(inputValue,0,0).width;
+	input = ofToString(value);
+	inputWidth = getTextBoundingBox(input,0,0).width;
 	b.x = 0;
 	b.y = 0;
 	b.width = width;
@@ -87,13 +87,13 @@ void ofxInputField<Type>::calculateSelectionArea(int selectIdx1, int selectIdx2)
 
 	float preSelectWidth = 0;
 	if(selectStartPos > 0){
-		preSelectStr.assign(inputValue,0,selectStartPos);
+		preSelectStr.assign(input,0,selectStartPos);
 		preSelectWidth = getTextBoundingBox(preSelectStr,0,0).width;
 	}
-	selectStartX = b.width - textPadding - inputValueWidth + preSelectWidth;
+	selectStartX = b.width - textPadding - inputWidth + preSelectWidth;
 
 	if(hasSelectedText()){
-		selectStr.assign(inputValue,selectStartPos,selectEndPos-selectStartPos);
+		selectStr.assign(input,selectStartPos,selectEndPos-selectStartPos);
 		selectionWidth = getTextBoundingBox(selectStr,0,0).width;
 	}
 }
@@ -112,8 +112,8 @@ bool ofxInputField<Type>::mousePressed(ofMouseEventArgs & args){
 			bGuiActive = true;
 		}
 
-		float cursorX = args.x - (b.x + b.width - textPadding - inputValueWidth);
-		int cursorPos = ofMap(cursorX,0,inputValueWidth,0,inputValue.size(),true);
+		float cursorX = args.x - (b.x + b.width - textPadding - inputWidth);
+		int cursorPos = ofMap(cursorX,0,inputWidth,0,input.size(),true);
 		mousePressedPos = cursorPos;
 
 		calculateSelectionArea(cursorPos, cursorPos);
@@ -133,8 +133,8 @@ bool ofxInputField<Type>::mouseDragged(ofMouseEventArgs & args){
 	if(!bGuiActive || !bMousePressed)
 		return false;
 
-	float cursorX = args.x - (b.x + b.width - textPadding - inputValueWidth);
-	int cursorPos = ofMap(cursorX,0,inputValueWidth,0,inputValue.size(),true);
+	float cursorX = args.x - (b.x + b.width - textPadding - inputWidth);
+	int cursorPos = ofMap(cursorX,0,inputWidth,0,input.size(),true);
 	calculateSelectionArea(mousePressedPos,cursorPos);
 	return false;
 }
@@ -147,7 +147,7 @@ bool ofxInputField<Type>::mouseReleased(ofMouseEventArgs & args){
 	if(bGuiActive){
 		if(pressCounter == 1 && !hasSelectedText()){
 			//activated panel without selecting an area => select all
-			calculateSelectionArea(0, inputValue.size());
+			calculateSelectionArea(0, input.size());
 		}
 	}
 
@@ -182,20 +182,20 @@ void ofxInputField<Type>::keyPressed(ofKeyEventArgs & args){
 		if(args.key >= '0' && args.key <= '9'){
 			int digit = args.key - '0';
 			if(hasSelectedText()){
-				inputValue.erase(selectStartPos,selectEndPos-selectStartPos);
+				input.erase(selectStartPos,selectEndPos-selectStartPos);
 			}
-			inputValue.insert(selectStartPos,ofToString(digit));
+			input.insert(selectStartPos,ofToString(digit));
 			newCursorIdx = selectStartPos + 1;
-			setValue(inputValue);
+			parseInput();
 		}else if(args.key == '.' || args.key == ',' ){
-			inputValue.insert(selectStartPos,".");
+			input.insert(selectStartPos,".");
 			newCursorIdx = selectStartPos + 1;
-			setValue(inputValue);
+			parseInput();
 		}else if(args.key == OF_KEY_BACKSPACE || args.key == OF_KEY_DEL){
 			if(hasSelectedText()){
-				inputValue.erase(selectStartPos,selectEndPos-selectStartPos);
+				input.erase(selectStartPos,selectEndPos-selectStartPos);
 				newCursorIdx = selectStartPos;
-				setValue(inputValue);
+				parseInput();
 			}else{
 				int deleteIdx = -1;
 				if(args.key == OF_KEY_BACKSPACE){
@@ -205,10 +205,10 @@ void ofxInputField<Type>::keyPressed(ofKeyEventArgs & args){
 				}
 
 				//erase char if valid deleteIdx
-				if(deleteIdx >= 0 && deleteIdx < inputValue.size()){
-					inputValue.erase(deleteIdx,1);
+				if(deleteIdx >= 0 && deleteIdx < input.size()){
+					input.erase(deleteIdx,1);
 					newCursorIdx = deleteIdx;
-					setValue(inputValue);
+					parseInput();
 				}
 			}
 		}else if(args.key == OF_KEY_LEFT){
@@ -221,7 +221,7 @@ void ofxInputField<Type>::keyPressed(ofKeyEventArgs & args){
 			if(hasSelectedText()){
 				newCursorIdx = selectEndPos;
 			}else{
-				newCursorIdx = selectStartPos == inputValue.size() ? inputValue.size() : selectStartPos+1;
+				newCursorIdx = selectStartPos == input.size() ? input.size() : selectStartPos+1;
 			}
 		}else if(args.key == OF_KEY_RETURN){
 			leaveFocus();
@@ -299,7 +299,7 @@ void ofxInputField<Type>::generateDraw(){
 
 template<typename Type>
 void ofxInputField<Type>::generateText(){
-	string valStr = inputValue;
+	string valStr = input;
 	textMesh = getTextMesh(getName(), b.x + textPadding, b.y + b.height / 2 + 4);
 	textMesh.append(getTextMesh(valStr, b.x + b.width - textPadding - getTextBoundingBox(valStr,0,0).width, b.y + b.height / 2 + 4));
 }
@@ -381,9 +381,9 @@ ofAbstractParameter & ofxInputField<Type>::getParameter(){
 }
 
 template<typename Type>
-void ofxInputField<Type>::setValue(std::string valStr){
+void ofxInputField<Type>::parseInput(){
 	bChangedInternally = true;
-	Type tmpVal = ofToFloat(valStr);
+	Type tmpVal = ofToFloat(input);
 	if(tmpVal < getMin()){
 		tmpVal = getMin();
 	}else if(tmpVal > getMax()){
@@ -396,12 +396,12 @@ template<typename Type>
 void ofxInputField<Type>::valueChanged(Type & value){
 	if(bChangedInternally){
 		bChangedInternally = false;
-		inputValueWidth = getTextBoundingBox(inputValue,0,0).width;
+		inputWidth = getTextBoundingBox(input,0,0).width;
 	}else{
-		inputValue = ofToString(value);
-		inputValueWidth = getTextBoundingBox(inputValue,0,0).width;
+		input = ofToString(value);
+		inputWidth = getTextBoundingBox(input,0,0).width;
 		if(bGuiActive){
-			int cursorPos = inputValue.size();
+			int cursorPos = input.size();
 			calculateSelectionArea(cursorPos,cursorPos);
 		}
 	}
@@ -412,8 +412,8 @@ template<typename Type>
 void ofxInputField<Type>::leaveFocus(){
 	bGuiActive = false;
 	pressCounter = 0;
-	inputValue = ofToString(value);
-	inputValueWidth = getTextBoundingBox(inputValue,0,0).width;
+	input = ofToString(value);
+	inputWidth = getTextBoundingBox(input,0,0).width;
 	setNeedsRedraw();
 }
 

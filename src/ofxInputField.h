@@ -59,9 +59,9 @@ protected:
 
 	bool bRegisteredForKeyEvents;
 
-	std::string inputValue;
-	float inputValueWidth;
-	void setValue(std::string valStr);
+	std::string input;
+	float inputWidth;
+	void parseInput();
 	bool bChangedInternally;
 
 	int mousePressedPos; //set by mouse interaction
@@ -81,5 +81,5 @@ protected:
 	void leaveFocus();
 };
 
-typedef ofxInputField<float> ofxFloatNumEdit;
-typedef ofxInputField<int> ofxIntNumEdit;
+typedef ofxInputField<float> ofxFloatField;
+typedef ofxInputField<int> ofxIntField;
