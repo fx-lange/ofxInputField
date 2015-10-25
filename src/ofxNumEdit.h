@@ -68,10 +68,15 @@ protected:
 	bool bChangedInternally;
 
 	int selectIdx1, selectIdx2; //set by mouse interaction
-	bool hasSelectionArea(){ return selectIdx1 != selectIdx2; }
+	bool hasSelectedText();
+
+	virtual void drawSelectedArea();
+	virtual void drawCursor();
+	virtual void drawFocusedBB();
+	virtual void drawMesh();
 
 	float selectStartX, selectWidth; //calculated from select indices
-	int selectStartIdx, selectEndIdx;
+	int selectStartPos, selectEndPos;
 	void calculateSelectionArea();
 
 	int pressCounter;

@@ -13,8 +13,8 @@ ofxNumEdit<Type>::ofxNumEdit(){
 	selectIdx1 = -1;
 	selectIdx2 = -1;
 	selectStartX = -1;
-	selectStartIdx = -1;
-	selectEndIdx = -1;
+	selectStartPos = -1;
+	selectEndPos = -1;
 	pressCounter = 0;
 	valueStrWidth = 0;
 	selectWidth = 0;
@@ -81,22 +81,22 @@ void ofxNumEdit<Type>::calculateSelectionArea(){
 	std::string preSelectStr, selectStr;
 
 	if(selectIdx1 <= selectIdx2){
-		selectStartIdx = selectIdx1;
-		selectEndIdx = selectIdx2;
+		selectStartPos = selectIdx1;
+		selectEndPos = selectIdx2;
 	}else{
-		selectStartIdx = selectIdx2;
-		selectEndIdx = selectIdx1;
+		selectStartPos = selectIdx2;
+		selectEndPos = selectIdx1;
 	}
 
 	float preSelectWidth = 0;
-	if(selectStartIdx > 0){
-		preSelectStr.assign(valueStr,0,selectStartIdx);
+	if(selectStartPos > 0){
+		preSelectStr.assign(valueStr,0,selectStartPos);
 		preSelectWidth = getTextBoundingBox(preSelectStr,0,0).width;
 	}
 	selectStartX = b.width - textPadding - valueStrWidth + preSelectWidth;
 
-	if(hasSelectionArea()){
-		selectStr.assign(valueStr,selectStartIdx,selectEndIdx-selectStartIdx);
+	if(hasSelectedText()){
+		selectStr.assign(valueStr,selectStartPos,selectEndPos-selectStartPos);
 		selectWidth = getTextBoundingBox(selectStr,0,0).width;
 	}
 }
@@ -152,7 +152,7 @@ bool ofxNumEdit<Type>::mouseReleased(ofMouseEventArgs & args){
 //		value.enableEvents();
 //	}
 	if(bGuiActive){
-		if(pressCounter == 1 && !hasSelectionArea()){
+		if(pressCounter == 1 && !hasSelectedText()){
 			//activated panel without selecting an area => select all
 			selectIdx1 = 0;
 			selectIdx2 = valueStr.size();
@@ -191,27 +191,27 @@ void ofxNumEdit<Type>::keyPressed(ofKeyEventArgs & args){
 		int newCursorIdx = -1;
 		if(args.key >= '0' && args.key <= '9'){
 			int digit = args.key - '0';
-			if(hasSelectionArea()){
-				valueStr.erase(selectStartIdx,selectEndIdx-selectStartIdx);
+			if(hasSelectedText()){
+				valueStr.erase(selectStartPos,selectEndPos-selectStartPos);
 			}
-			valueStr.insert(selectStartIdx,ofToString(digit));
-			newCursorIdx = selectStartIdx + 1;
+			valueStr.insert(selectStartPos,ofToString(digit));
+			newCursorIdx = selectStartPos + 1;
 			setValue(valueStr);
 		}else if(args.key == '.' || args.key == ',' ){
-			valueStr.insert(selectStartIdx,".");
-			newCursorIdx = selectStartIdx + 1;
+			valueStr.insert(selectStartPos,".");
+			newCursorIdx = selectStartPos + 1;
 			setValue(valueStr);
 		}else if(args.key == OF_KEY_BACKSPACE || args.key == OF_KEY_DEL){
-			if(hasSelectionArea()){
-				valueStr.erase(selectStartIdx,selectEndIdx-selectStartIdx);
-				newCursorIdx = selectStartIdx;
+			if(hasSelectedText()){
+				valueStr.erase(selectStartPos,selectEndPos-selectStartPos);
+				newCursorIdx = selectStartPos;
 				setValue(valueStr);
 			}else{
 				int deleteIdx = -1;
 				if(args.key == OF_KEY_BACKSPACE){
-					deleteIdx = selectStartIdx-1;
+					deleteIdx = selectStartPos-1;
 				}else if(args.key == OF_KEY_DEL){
-					deleteIdx = selectStartIdx;
+					deleteIdx = selectStartPos;
 				}
 
 				//erase char if valid deleteIdx
@@ -222,16 +222,16 @@ void ofxNumEdit<Type>::keyPressed(ofKeyEventArgs & args){
 				}
 			}
 		}else if(args.key == OF_KEY_LEFT){
-			if(hasSelectionArea()){
-				newCursorIdx = selectStartIdx;
+			if(hasSelectedText()){
+				newCursorIdx = selectStartPos;
 			}else{
-				newCursorIdx = selectStartIdx == 0 ? 0 : selectStartIdx-1;
+				newCursorIdx = selectStartPos == 0 ? 0 : selectStartPos-1;
 			}
 		}else if(args.key == OF_KEY_RIGHT){
-			if(hasSelectionArea()){
-				newCursorIdx = selectEndIdx;
+			if(hasSelectedText()){
+				newCursorIdx = selectEndPos;
 			}else{
-				newCursorIdx = selectStartIdx == valueStr.size() ? valueStr.size() : selectStartIdx+1;
+				newCursorIdx = selectStartPos == valueStr.size() ? valueStr.size() : selectStartPos+1;
 			}
 		}else if(args.key == OF_KEY_RETURN){
 			leaveFocus();
@@ -315,30 +315,28 @@ void ofxNumEdit<Type>::generateText(){
 
 template<typename Type>
 void ofxNumEdit<Type>::render(){
-	ofColor c = ofGetStyle().color;
-
 	bg.draw();
-	if(bGuiActive){
-		//focus highlight
-		ofPushStyle();
-		ofSetColor(255);
-		ofNoFill();
-		ofDrawRectangle(b);
-		ofPopStyle();
 
-		//selection
-		ofPushStyle();
-		if(hasSelectionArea()){
-			ofSetColor(thisFillColor);
-			ofFill();
-			ofDrawRectangle(selectStartX+b.x,b.y+1,selectWidth,b.height-2);
+	if(bGuiActive){
+		drawFocusedBB();
+
+		if(hasSelectedText()){
+			drawSelectedArea();
 		}else{
-			ofSetColor(thisTextColor);
-			ofDrawLine(selectStartX+b.x,b.y,selectStartX+b.x,b.y+b.height);
+			drawCursor();
 		}
-		ofPopStyle();
 	}
 
+	drawMesh();
+}
+
+template<typename Type>
+bool ofxNumEdit<Type>::hasSelectedText(){
+	return selectIdx1 != selectIdx2;
+}
+
+template<typename Type>
+void ofxNumEdit<Type>::drawMesh(){
 	ofBlendMode blendMode = ofGetStyle().blendingMode;
 	if(blendMode!=OF_BLENDMODE_ALPHA){
 		ofEnableAlphaBlending();
@@ -349,12 +347,37 @@ void ofxNumEdit<Type>::render(){
 	textMesh.draw();
 	unbindFontTexture();
 
+	ofColor c = ofGetStyle().color;
 	ofSetColor(c);
 	if(blendMode!=OF_BLENDMODE_ALPHA){
 		ofEnableBlendMode(blendMode);
 	}
 }
 
+template<typename Type>
+void ofxNumEdit<Type>::drawSelectedArea(){
+	ofPushStyle();
+	ofSetColor(thisFillColor);
+	ofFill();
+	ofDrawRectangle( selectStartX+b.x, b.y+1, selectWidth, b.height-2 );
+	ofPopStyle();
+}
+
+template<typename Type>
+void ofxNumEdit<Type>::drawCursor(){
+	ofPushStyle();
+	ofSetColor(thisTextColor);
+	ofDrawLine( selectStartX+b.x, b.y, selectStartX+b.x, b.y+b.height );
+	ofPopStyle();
+}
+
+template<typename Type>
+void ofxNumEdit<Type>::drawFocusedBB(){
+	ofPushStyle();
+	ofSetColor(thisTextColor);
+	ofDrawLine( selectStartX+b.x, b.y, selectStartX+b.x, b.y+b.height );
+	ofPopStyle();
+}
 
 template<typename Type>
 bool ofxNumEdit<Type>::setValue(float mx, float my, bool bCheck){
