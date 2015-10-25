@@ -67,7 +67,7 @@ protected:
 	void setValue(std::string valStr);
 	bool bChangedInternally;
 
-	int selectIdx1, selectIdx2; //set by mouse interaction
+	int mousePressedPos; //set by mouse interaction
 	bool hasSelectedText();
 
 	virtual void drawSelectedArea();
@@ -77,7 +77,7 @@ protected:
 
 	float selectStartX, selectWidth; //calculated from select indices
 	int selectStartPos, selectEndPos;
-	void calculateSelectionArea();
+	void calculateSelectionArea(int selectIdx1, int selectIdx2);
 
 	int pressCounter;
 

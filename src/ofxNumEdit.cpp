@@ -10,8 +10,7 @@ ofxNumEdit<Type>::ofxNumEdit(){
 	bMousePressed = false;
 	mouseInside = false;
 	bRegisteredForKeyEvents = false;
-	selectIdx1 = -1;
-	selectIdx2 = -1;
+	mousePressedPos = -1;
 	selectStartX = -1;
 	selectStartPos = -1;
 	selectEndPos = -1;
@@ -77,7 +76,7 @@ Type ofxNumEdit<Type>::getMax(){
 }
 
 template<typename Type>
-void ofxNumEdit<Type>::calculateSelectionArea(){
+void ofxNumEdit<Type>::calculateSelectionArea(int selectIdx1, int selectIdx2){
 	std::string preSelectStr, selectStr;
 
 	if(selectIdx1 <= selectIdx2){
@@ -119,10 +118,10 @@ bool ofxNumEdit<Type>::mousePressed(ofMouseEventArgs & args){
 		}
 
 		float cursorX = args.x - (b.x + b.width - textPadding - valueStrWidth);
-		int cursorIdx = ofMap(cursorX,0,valueStrWidth,0,valueStr.size(),true);
-		selectIdx1 = selectIdx2 = cursorIdx;
+		int cursorPos = ofMap(cursorX,0,valueStrWidth,0,valueStr.size(),true);
+		mousePressedPos = cursorPos;
 
-		calculateSelectionArea();
+		calculateSelectionArea(cursorPos, cursorPos);
 
 		pressCounter++;
 
@@ -140,9 +139,8 @@ bool ofxNumEdit<Type>::mouseDragged(ofMouseEventArgs & args){
 		return false;
 
 	float cursorX = args.x - (b.x + b.width - textPadding - valueStrWidth);
-	int cursorIdx = ofMap(cursorX,0,valueStrWidth,0,valueStr.size(),true);
-	selectIdx2 = cursorIdx;
-	calculateSelectionArea();
+	int cursorPos = ofMap(cursorX,0,valueStrWidth,0,valueStr.size(),true);
+	calculateSelectionArea(mousePressedPos,cursorPos);
 	return false;
 }
 
@@ -154,9 +152,7 @@ bool ofxNumEdit<Type>::mouseReleased(ofMouseEventArgs & args){
 	if(bGuiActive){
 		if(pressCounter == 1 && !hasSelectedText()){
 			//activated panel without selecting an area => select all
-			selectIdx1 = 0;
-			selectIdx2 = valueStr.size();
-			calculateSelectionArea();
+			calculateSelectionArea(0, valueStr.size());
 		}
 	}
 
@@ -239,8 +235,7 @@ void ofxNumEdit<Type>::keyPressed(ofKeyEventArgs & args){
 
 		if(newCursorIdx != -1){
 			//set cursor
-			selectIdx1 = selectIdx2 = newCursorIdx;
-			calculateSelectionArea();
+			calculateSelectionArea(newCursorIdx,newCursorIdx);
 		}
 	}
 }
@@ -332,7 +327,7 @@ void ofxNumEdit<Type>::render(){
 
 template<typename Type>
 bool ofxNumEdit<Type>::hasSelectedText(){
-	return selectIdx1 != selectIdx2;
+	return selectStartPos != selectEndPos;
 }
 
 template<typename Type>
@@ -417,8 +412,8 @@ void ofxNumEdit<Type>::valueChanged(Type & value){
 		valueStr = ofToString(value);
 		valueStrWidth = getTextBoundingBox(valueStr,0,0).width;
 		if(bGuiActive){
-			selectIdx1 = selectIdx2 = valueStr.size();
-			calculateSelectionArea();
+			int cursorPos = valueStr.size();
+			calculateSelectionArea(cursorPos,cursorPos);
 		}
 	}
     setNeedsRedraw();
