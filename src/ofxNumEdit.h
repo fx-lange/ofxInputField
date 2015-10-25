@@ -30,8 +30,6 @@ public:
     virtual void keyPressed(ofKeyEventArgs & args);
     virtual void keyReleased(ofKeyEventArgs & args);
 
-	void setUpdateOnEnterOnly(bool bUpdateOnEnterOnly);
-
 	template<class ListenerClass, typename ListenerMethod>
 	void addListener(ListenerClass * listener, ListenerMethod method){
 		value.addListener(listener,method);
@@ -50,7 +48,6 @@ public:
 protected:
 	virtual void render();
 	ofParameter<Type> value;
-	bool bUpdateOnEnterOnly;
 	bool bGuiActive, bMousePressed;
 	bool mouseInside;
 	bool setValue(float mx, float my, bool bCheck);

@@ -1,11 +1,10 @@
-#include "ofGraphics.h"
 #include "ofxNumEdit.h"
-using namespace std;
+
+#include "ofGraphics.h"
 
 template<typename Type>
 ofxNumEdit<Type>::ofxNumEdit(){
 	bChangedInternally = false;
-	bUpdateOnEnterOnly = false;
 	bGuiActive = false;
 	bMousePressed = false;
 	mouseInside = false;
@@ -31,7 +30,6 @@ ofxNumEdit<Type>::ofxNumEdit(ofParameter<Type> _val, float width, float height){
 
 template<typename Type>
 ofxNumEdit<Type>* ofxNumEdit<Type>::setup(ofParameter<Type> _val, float width, float height){
-	bUpdateOnEnterOnly = false;
 	value.makeReferenceTo(_val);
 	valueStr = ofToString(value);
 	valueStrWidth = getTextBoundingBox(valueStr,0,0).width;
@@ -108,9 +106,6 @@ bool ofxNumEdit<Type>::mouseMoved(ofMouseEventArgs & args){
 
 template<typename Type>
 bool ofxNumEdit<Type>::mousePressed(ofMouseEventArgs & args){
-//	if(bUpdateOnEnterOnly){ TODO for later
-//		value.disableEvents();
-//	}
 	if(b.inside(args.x,args.y)){
 		bMousePressed = true;
 		if(!bGuiActive){
@@ -180,7 +175,6 @@ void ofxNumEdit<Type>::unregisterKeyEvents(){
 
 template<typename Type>
 void ofxNumEdit<Type>::keyPressed(ofKeyEventArgs & args){
-	//TODO use selection
 	if(bGuiActive && !bMousePressed){
 		ofLogNotice("keyPressed") << args.key;
 
@@ -382,12 +376,6 @@ bool ofxNumEdit<Type>::setValue(float mx, float my, bool bCheck){
 template<typename Type>
 ofAbstractParameter & ofxNumEdit<Type>::getParameter(){
 	return value;
-}
-
-
-template<typename Type>
-void ofxNumEdit<Type>::setUpdateOnEnterOnly(bool _bUpdateOnEnterOnly){
-	bUpdateOnEnterOnly = _bUpdateOnEnterOnly;
 }
 
 template<typename Type>

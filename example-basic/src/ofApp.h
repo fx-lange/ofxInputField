@@ -36,6 +36,8 @@ public:
 	ofxToggle filled;
 	ofxButton twoCircles;
 	ofxLabel screenSize;
+	ofxNumEdit<float> label;
+
 
 	ofxPanel gui;
 };
