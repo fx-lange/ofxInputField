@@ -1,7 +1,7 @@
 # ofxNumEdit
 
-an ofxGui extension to adjust numbers with a text input field in openFrameworks. ofxNumEdit is an alternative to ofxSlider to directly define numbers more precicly.
-the mouse and keyboard controls are elaborated in detail. check out the example with an int and float version ofxNumEdit.
+an ofxGui extension to adjust numbers or text with an input field in openFrameworks. ofxInputField can be an alternative to ofxSlider to define numbers more precicly.
+the mouse and keyboard controls are elaborated in detail. check out the example with an int, float and string version ofxInputField.
 
 Dependencies
 ----
