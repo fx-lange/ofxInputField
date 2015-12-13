@@ -1,2 +1,2 @@
+ofxInputField
 ofxGui
-ofxNumEdit
