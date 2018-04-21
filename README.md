@@ -1,3 +1,7 @@
+# Deprecated
+
+This add-on is already integrated into ofxGui in the current master and will be part of the 0.10.0 release.
+
 # ofxInputField
 
 Text and number input field for openFrameworks extending ofxGui. So in contrast to ofxTextInputField it works out of the box with ofxGui (but also only there). 
